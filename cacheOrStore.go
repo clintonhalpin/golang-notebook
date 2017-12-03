@@ -5,10 +5,17 @@ import (
 	"time"
 	"math/rand"
 )
-
 /**
- * [main description]
- * @return {[type]} [description]
+ * A map, that would reseumble a list of redis cache keys
+ */
+var cache = map[string]bool {
+    "r1": true,
+    "r3": true,
+    "r4": true,
+}
+/**
+ * [fanIn, uses Select(similar to switch) in order to pick the input func that finishes first)]
+ * @return {chan} []
  */
 func fanIn(input1, input2 <-chan string) <-chan string {
 	c := make(chan string)
@@ -23,29 +30,53 @@ func fanIn(input1, input2 <-chan string) <-chan string {
 	return c
 }
 /**
- * [main description]
- * @return {[type]} [description]
+ * [fromCache look in cache, for request path]
+ * @return
  */
-func printString(msg string) <-chan string {
+func fromCache(r request) <-chan string {
+	c := make(chan string)
+	go func() {
+		if cache[r.path] && ! r.auth {
+	  	c <- fmt.Sprintf("Winner: 🔥 Cache")
+		}
+	}()
+	return c
+}
+/**
+ * [fromStore, nothing to see here just a random return time]
+ * @return
+ */
+func fromStore(request) <-chan string {
 	c := make(chan string)
 	go func() {
 		for i := 0; ; i++ {
-			c <- fmt.Sprintf("Winner: %s", msg)
+			c <- fmt.Sprintf("Winner: 📁 store")
 			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
 		}
 	}()
 	return c
 }
 /**
- * [main description]
- * @return {[type]} [description]
+ * request
+ */
+type request struct {
+    path string
+    auth bool
+}
+/**
+ * [Make 5 fictious requests and see which comes back cache or store]
  */
 func main() {
-	c := fanIn(printString(`fromCache`), printString(`fromStore`))
 	for i := 0; i < 10; i++ {
 		fmt.Println("Loop #", i)
+		r := fmt.Sprintf("r%v", i)
+		c := fanIn(
+				fromCache(request{r, false}), 
+				fromStore(request{r, false}),
+		)
 		fmt.Println(<-c)
 		fmt.Println("===")
 	}
+
 	fmt.Println(`All done`)
 }
