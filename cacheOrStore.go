@@ -73,8 +73,8 @@ func main() {
 		fmt.Println("Loop #", i)
 		r := fmt.Sprintf("r%v", i)
 		c := fanIn(
-				fromCache(request{r, false}), 
-				fromStore(request{r, false}),
+			fromCache(request{r, false}), 
+			fromStore(request{r, false}),
 		)
 		fmt.Println(<-c)
 		fmt.Println("===")
