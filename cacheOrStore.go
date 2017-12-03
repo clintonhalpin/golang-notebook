@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"time"
-	"math/rand"
 )
 /**
  * A map, that would reseumble a list of redis cache keys
@@ -35,6 +34,9 @@ func fanIn(input1, input2 <-chan string) <-chan string {
  */
 func fromCache(r request) <-chan string {
 	c := make(chan string)
+	/**
+	 * @todo, confused why this dosen't always win
+	 */
 	go func() {
 		if cache[r.path] && ! r.auth {
 	  	c <- fmt.Sprintf("Winner: 🔥 Cache")
@@ -51,7 +53,7 @@ func fromStore(request) <-chan string {
 	go func() {
 		for i := 0; ; i++ {
 			c <- fmt.Sprintf("Winner: 📁 store")
-			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
+			time.Sleep(time.Duration(5000))
 		}
 	}()
 	return c
