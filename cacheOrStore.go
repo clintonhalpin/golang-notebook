@@ -19,6 +19,9 @@ var cache = map[string]bool {
 func fanIn(input1, input2 <-chan string) <-chan string {
 	c := make(chan string)
 	go func() {
+		/**
+		 * go, dosen't have a "while" loop just a for loop w/o init,condition,post
+		 */
 		for {
 			select {
 				case s := <-input1: c <- s
@@ -34,9 +37,6 @@ func fanIn(input1, input2 <-chan string) <-chan string {
  */
 func fromCache(r request) <-chan string {
 	c := make(chan string)
-	/**
-	 * @todo, confused why this dosen't always win
-	 */
 	go func() {
 		if cache[r.path] && ! r.auth {
 	  	c <- fmt.Sprintf("Winner: 🔥 Cache")
@@ -52,8 +52,8 @@ func fromStore(request) <-chan string {
 	c := make(chan string)
 	go func() {
 		for i := 0; ; i++ {
+			time.Sleep(time.Duration(10000))
 			c <- fmt.Sprintf("Winner: 📁 store")
-			time.Sleep(time.Duration(5000))
 		}
 	}()
 	return c
